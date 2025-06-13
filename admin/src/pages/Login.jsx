@@ -5,64 +5,119 @@ import { AdminContext } from '../context/AdminContext'
 import { toast } from 'react-toastify'
 
 const Login = () => {
-
   const [state, setState] = useState('Admin')
-
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL
-
   const { setDToken } = useContext(DoctorContext)
   const { setAToken } = useContext(AdminContext)
 
   const onSubmitHandler = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
-    if (state === 'Admin') {
+    try {
+      const endpoint =
+        state === 'Admin' ? '/api/admin/login' : '/api/doctor/login'
+      const { data } = await axios.post(backendUrl + endpoint, {
+        email,
+        password,
+      })
 
-      const { data } = await axios.post(backendUrl + '/api/admin/login', { email, password })
       if (data.success) {
-        setAToken(data.token)
-        localStorage.setItem('aToken', data.token)
+        if (state === 'Admin') {
+          setAToken(data.token)
+          localStorage.setItem('aToken', data.token)
+        } else {
+          setDToken(data.token)
+          localStorage.setItem('dToken', data.token)
+        }
+        toast.success(`${state} login successful`)
       } else {
         toast.error(data.message)
       }
-
-    } else {
-
-      const { data } = await axios.post(backendUrl + '/api/doctor/login', { email, password })
-      if (data.success) {
-        setDToken(data.token)
-        localStorage.setItem('dToken', data.token)
-      } else {
-        toast.error(data.message)
-      }
-
+    } catch (error) {
+      toast.error(error.message)
     }
-
   }
 
   return (
-    <form onSubmit={onSubmitHandler} className='min-h-[80vh] flex items-center'>
-      <div className='flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-[#5E5E5E] text-sm shadow-lg'>
-        <p className='text-2xl font-semibold m-auto'><span className='text-primary'>{state}</span> Login</p>
-        <div className='w-full '>
-          <p>Email</p>
-          <input onChange={(e) => setEmail(e.target.value)} value={email} className='border border-[#DADADA] rounded w-full p-2 mt-1' type="email" required />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#F5F7FA] to-[#C3CFE2] px-4">
+      <form
+        onSubmit={onSubmitHandler}
+        className="w-full max-w-md bg-white p-8 rounded-xl shadow-xl space-y-6"
+      >
+        <div className="flex justify-center gap-4">
+          <button
+            type="button"
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              state === 'Admin'
+                ? 'bg-gradient-to-r from-[#6a11cb] to-[#2575fc] text-white'
+                : 'bg-gray-100 text-gray-600'
+            }`}
+            onClick={() => setState('Admin')}
+          >
+            Admin
+          </button>
+          <button
+            type="button"
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              state === 'Doctor'
+                ? 'bg-gradient-to-r from-[#ff416c] to-[#ff4b2b] text-white'
+                : 'bg-gray-100 text-gray-600'
+            }`}
+            onClick={() => setState('Doctor')}
+          >
+            Doctor
+          </button>
         </div>
-        <div className='w-full '>
-          <p>Password</p>
-          <input onChange={(e) => setPassword(e.target.value)} value={password} className='border border-[#DADADA] rounded w-full p-2 mt-1' type="password" required />
+
+        <h2 className="text-center text-2xl font-bold text-gray-800">
+          {state} Login
+        </h2>
+
+        <div>
+          <label className="block text-gray-700 mb-1">Email Address</label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
         </div>
-        <button className='bg-primary text-white w-full py-2 rounded-md text-base'>Login</button>
-        {
-          state === 'Admin'
-            ? <p>Doctor Login? <span onClick={() => setState('Doctor')} className='text-primary underline cursor-pointer'>Click here</span></p>
-            : <p>Admin Login? <span onClick={() => setState('Admin')} className='text-primary underline cursor-pointer'>Click here</span></p>
-        }
-      </div>
-    </form>
+
+        <div>
+          <label className="block text-gray-700 mb-1">Password</label>
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-all"
+        >
+          Login
+        </button>
+
+        <p className="text-center text-sm text-gray-500">
+          Switch to{' '}
+          <span
+            onClick={() =>
+              setState((prev) => (prev === 'Admin' ? 'Doctor' : 'Admin'))
+            }
+            className="text-blue-500 underline cursor-pointer"
+          >
+            {state === 'Admin' ? 'Doctor Login' : 'Admin Login'}
+          </span>
+        </p>
+      </form>
+    </div>
   )
 }
 

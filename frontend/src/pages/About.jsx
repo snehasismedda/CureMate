@@ -8,7 +8,7 @@ const About = () => {
       
       {/* About Us Title */}
       <div className="text-center text-3xl font-bold tracking-wide text-primary">
-        <p>About <span className="text-gray-800">Prescripto</span></p>
+        <p>About <span className="text-gray-800">CureMate</span></p>
         <div className="mt-2 h-1 w-20 mx-auto bg-primary rounded-full"></div>
       </div>
 
@@ -21,7 +21,7 @@ const About = () => {
         />
         <div className="flex flex-col gap-6 md:w-2/3 text-base text-gray-600 leading-relaxed">
           <p>
-            <strong className="text-gray-800">Prescripto</strong> is your
+            <strong className="text-gray-800">CureMate</strong> is your
             intelligent health partner—streamlining appointment scheduling,
             healthcare access, and medical record management. We believe in
             placing the power of seamless healthcare directly into your hands.

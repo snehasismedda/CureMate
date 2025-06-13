@@ -6,7 +6,6 @@ import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
 
 const AddDoctor = () => {
-
     const [docImg, setDocImg] = useState(false)
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
@@ -26,13 +25,9 @@ const AddDoctor = () => {
         event.preventDefault()
 
         try {
+            if (!docImg) return toast.error('Image Not Selected')
 
-            if (!docImg) {
-                return toast.error('Image Not Selected')
-            }
-
-            const formData = new FormData();
-
+            const formData = new FormData()
             formData.append('image', docImg)
             formData.append('name', name)
             formData.append('email', email)
@@ -44,12 +39,10 @@ const AddDoctor = () => {
             formData.append('degree', degree)
             formData.append('address', JSON.stringify({ line1: address1, line2: address2 }))
 
-            // console log formdata            
-            formData.forEach((value, key) => {
-                console.log(`${key}: ${value}`);
-            });
+            const { data } = await axios.post(`${backendUrl}/api/admin/add-doctor`, formData, {
+                headers: { aToken }
+            })
 
-            const { data } = await axios.post(backendUrl + '/api/admin/add-doctor', formData, { headers: { aToken } })
             if (data.success) {
                 toast.success(data.message)
                 setDocImg(false)
@@ -64,110 +57,101 @@ const AddDoctor = () => {
             } else {
                 toast.error(data.message)
             }
-
         } catch (error) {
             toast.error(error.message)
             console.log(error)
         }
-
     }
 
     return (
-        <form onSubmit={onSubmitHandler} className='m-5 w-full'>
+        <form onSubmit={onSubmitHandler} className="w-full px-4 md:px-10 py-6 max-w-6xl mx-auto">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Add New Doctor</h2>
 
-            <p className='mb-3 text-lg font-medium'>Add Doctor</p>
-
-            <div className='bg-white px-8 py-8 border rounded w-full max-w-4xl max-h-[80vh] overflow-y-scroll'>
-                <div className='flex items-center gap-4 mb-8 text-gray-500'>
-                    <label htmlFor="doc-img">
-                        <img className='w-16 bg-gray-100 rounded-full cursor-pointer' src={docImg ? URL.createObjectURL(docImg) : assets.upload_area} alt="" />
+            <div className="bg-white shadow-md rounded-2xl p-6 space-y-6">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <label htmlFor="doc-img" className="cursor-pointer">
+                        <img
+                            className="w-24 h-24 object-cover rounded-full border-2 border-dashed border-gray-300"
+                            src={docImg ? URL.createObjectURL(docImg) : assets.upload_area}
+                            alt="Doctor Upload"
+                        />
                     </label>
-                    <input onChange={(e) => setDocImg(e.target.files[0])} type="file" name="" id="doc-img" hidden />
-                    <p>Upload doctor <br /> picture</p>
+                    <input type="file" id="doc-img" hidden onChange={(e) => setDocImg(e.target.files[0])} />
+                    <p className="text-gray-500">Click to upload doctor's picture</p>
                 </div>
 
-                <div className='flex flex-col lg:flex-row items-start gap-10 text-gray-600'>
-
-                    <div className='w-full lg:flex-1 flex flex-col gap-4'>
-
-                        <div className='flex-1 flex flex-col gap-1'>
-                            <p>Your name</p>
-                            <input onChange={e => setName(e.target.value)} value={name} className='border rounded px-3 py-2' type="text" placeholder='Name' required />
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Name</label>
+                            <input value={name} onChange={e => setName(e.target.value)} required className="input" type="text" placeholder="Doctor's Name" />
                         </div>
 
-                        <div className='flex-1 flex flex-col gap-1'>
-                            <p>Doctor Email</p>
-                            <input onChange={e => setEmail(e.target.value)} value={email} className='border rounded px-3 py-2' type="email" placeholder='Email' required />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Email</label>
+                            <input value={email} onChange={e => setEmail(e.target.value)} required className="input" type="email" placeholder="Email Address" />
                         </div>
 
-
-                        <div className='flex-1 flex flex-col gap-1'>
-                            <p>Set Password</p>
-                            <input onChange={e => setPassword(e.target.value)} value={password} className='border rounded px-3 py-2' type="password" placeholder='Password' required />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Password</label>
+                            <input value={password} onChange={e => setPassword(e.target.value)} required className="input" type="password" placeholder="Set Password" />
                         </div>
 
-                        <div className='flex-1 flex flex-col gap-1'>
-                            <p>Experience</p>
-                            <select onChange={e => setExperience(e.target.value)} value={experience} className='border rounded px-2 py-2' >
-                                <option value="1 Year">1 Year</option>
-                                <option value="2 Year">2 Years</option>
-                                <option value="3 Year">3 Years</option>
-                                <option value="4 Year">4 Years</option>
-                                <option value="5 Year">5 Years</option>
-                                <option value="6 Year">6 Years</option>
-                                <option value="8 Year">8 Years</option>
-                                <option value="9 Year">9 Years</option>
-                                <option value="10 Year">10 Years</option>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Experience</label>
+                            <select value={experience} onChange={e => setExperience(e.target.value)} className="input">
+                                {[...Array(10)].map((_, i) => (
+                                    <option key={i + 1} value={`${i + 1} Year`}>{i + 1} Year{(i + 1) > 1 ? 's' : ''}</option>
+                                ))}
                             </select>
                         </div>
 
-                        <div className='flex-1 flex flex-col gap-1'>
-                            <p>Fees</p>
-                            <input onChange={e => setFees(e.target.value)} value={fees} className='border rounded px-3 py-2' type="number" placeholder='Doctor fees' required />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Fees (₹)</label>
+                            <input value={fees} onChange={e => setFees(e.target.value)} required className="input" type="number" placeholder="Doctor's Fees" />
                         </div>
-
                     </div>
 
-                    <div className='w-full lg:flex-1 flex flex-col gap-4'>
-
-                        <div className='flex-1 flex flex-col gap-1'>
-                            <p>Speciality</p>
-                            <select onChange={e => setSpeciality(e.target.value)} value={speciality} className='border rounded px-2 py-2'>
-                                <option value="General physician">General physician</option>
-                                <option value="Gynecologist">Gynecologist</option>
-                                <option value="Dermatologist">Dermatologist</option>
-                                <option value="Pediatricians">Pediatricians</option>
-                                <option value="Neurologist">Neurologist</option>
-                                <option value="Gastroenterologist">Gastroenterologist</option>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Speciality</label>
+                            <select value={speciality} onChange={e => setSpeciality(e.target.value)} className="input">
+                                {['General physician', 'Gynecologist', 'Dermatologist', 'Pediatricians', 'Neurologist', 'Gastroenterologist'].map(spec => (
+                                    <option key={spec} value={spec}>{spec}</option>
+                                ))}
                             </select>
                         </div>
 
-
-                        <div className='flex-1 flex flex-col gap-1'>
-                            <p>Degree</p>
-                            <input onChange={e => setDegree(e.target.value)} value={degree} className='border rounded px-3 py-2' type="text" placeholder='Degree' required />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Degree</label>
+                            <input value={degree} onChange={e => setDegree(e.target.value)} required className="input" type="text" placeholder="Medical Degree" />
                         </div>
 
-                        <div className='flex-1 flex flex-col gap-1'>
-                            <p>Address</p>
-                            <input onChange={e => setAddress1(e.target.value)} value={address1} className='border rounded px-3 py-2' type="text" placeholder='Address 1' required />
-                            <input onChange={e => setAddress2(e.target.value)} value={address2} className='border rounded px-3 py-2' type="text" placeholder='Address 2' required />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Address</label>
+                            <input value={address1} onChange={e => setAddress1(e.target.value)} required className="input mb-2" type="text" placeholder="Address Line 1" />
+                            <input value={address2} onChange={e => setAddress2(e.target.value)} required className="input" type="text" placeholder="Address Line 2" />
                         </div>
-
                     </div>
-
                 </div>
 
                 <div>
-                    <p className='mt-4 mb-2'>About Doctor</p>
-                    <textarea onChange={e => setAbout(e.target.value)} value={about} className='w-full px-4 pt-2 border rounded' rows={5} placeholder='write about doctor'></textarea>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">About Doctor</label>
+                    <textarea
+                        value={about}
+                        onChange={e => setAbout(e.target.value)}
+                        rows={5}
+                        placeholder="Write a short bio..."
+                        className="w-full border rounded-md px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring"
+                    ></textarea>
                 </div>
 
-                <button type='submit' className='bg-primary px-10 py-3 mt-4 text-white rounded-full'>Add doctor</button>
-
+                <div className="flex justify-end">
+                    <button type="submit" className="bg-blue-600 hover:bg-blue-700 transition-all px-8 py-2 text-white rounded-full font-semibold shadow-md">
+                        Add Doctor
+                    </button>
+                </div>
             </div>
-
-
         </form>
     )
 }
