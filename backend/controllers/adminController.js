@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import validator from "validator";
 import { v2 as cloudinary } from "cloudinary";
 import userModel from "../models/userModel.js";
+import visitorModel from "../models/visitorModel.js";
 
 // API for admin login
 const loginAdmin = async (req, res) => {
@@ -148,11 +149,36 @@ const adminDashboard = async (req, res) => {
     }
 }
 
+const metricsData = async (req, res) => {
+  try {
+
+    const totalVisitors = await visitorModel.countDocuments();
+    const uniqueIPs = await visitorModel.distinct('ip');
+    const recentVisits = await visitorModel.find({})
+      .sort({ visitedAt: -1 })
+      .limit(10)
+      .select('ip visitedAt -_id');
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalVisitors,
+        uniqueVisitors: uniqueIPs.length,
+        recentVisits
+      }
+    });
+  } catch (error) {
+    console.error('Metrics Controller Error:', error);
+    res.status(500).json({ error: 'Failed to fetch metrics' });
+  }
+};
+
 export {
     loginAdmin,
     appointmentsAdmin,
     appointmentCancel,
     addDoctor,
     allDoctors,
-    adminDashboard
+    adminDashboard,
+    metricsData
 }
